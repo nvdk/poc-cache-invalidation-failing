@@ -5,7 +5,7 @@ defmodule Dispatcher do
     json: [ "application/json", "application/vnd.api+json" ]
   ]
 
-  @any %{}
+  @any  %{ accept: %{ any: true } }
   @json %{ accept: %{ json: true } }
   @html %{ accept: %{ html: true } }
 
@@ -19,7 +19,23 @@ defmodule Dispatcher do
   # Run `docker-compose restart dispatcher` after updating
   # this file.
 
-  match "/*_", %{ last_call: true } do
-    send_resp( conn, 404, "Route not found.  See config/dispatcher.ex" )
+  delete "/zittingen/*path" do
+    forward conn, path, "http://meeting/"
+  end
+
+  match "/zittingen/*path" do
+    forward conn, path, "http://cache/zittingen/"
+  end
+
+  match "/assets/*path", @html do
+    forward conn, path, "http://frontend/assets/"
+  end
+
+  match "/*_path", @html do
+    forward conn, [], "http://frontend/index.html"
+  end
+
+  match "/*_", %{ last_call: true, accept: %{ json: true } } do
+    send_resp( conn, 404, "{ \"error\": { \"code\": 404, \"message\": \"Route not found.  See config/dispatcher.ex\" } }" )
   end
 end

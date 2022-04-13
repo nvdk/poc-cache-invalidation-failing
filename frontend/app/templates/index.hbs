@@ -1,0 +1,12 @@
+{{page-title "Index"}}
+<button {{on 'click' this.createMeeting}}>Create</button>
+{{#if this.refresh}}
+  refreshing in {{this.refresh}} seconds
+{{/if}}
+<ul>
+{{#each @model as |meeting|}}
+  <li>meeting {{meeting.id}} {{meeting.geplandeStart}} <button {{on 'click' (fn this.deleteMeeting meeting)}}>Delete</button></li>
+{{/each}}
+</ul>
+{{outlet}}
+

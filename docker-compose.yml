@@ -1,21 +1,33 @@
 version: '3.4'
-
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "20"
 services:
+  frontend:
+    build: frontend
   identifier:
     image: semtech/mu-identifier:1.9.1
-    environment:
-      SESSION_COOKIE_SECURE: "on"
     links:
       - dispatcher:dispatcher
     ports:
       - "80:80"
+    environment:
+      DEFAULT_MU_AUTH_ALLOWED_GROUPS_HEADER: "[{\"variables\":[],\"name\":\"public\"}]"
+      DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN_HEADER: '*'
+
   dispatcher:
     image: semtech/mu-dispatcher:2.0.0
     links:
       - resource:resource
     volumes:
       - ./config/dispatcher:/config
-  database:
+  cache:
+    image: semtech/mu-cache:2.0.0
+    links:
+      - resource:backend
+  virtuoso:
     image: redpencil/virtuoso:1.0.0
     environment:
       SPARQL_UPDATE: "true"
@@ -26,8 +38,39 @@ services:
       - ./data/db:/data
       - ./config/virtuoso/virtuoso.ini:/data/virtuoso.ini
   resource:
-    image: semtech/mu-cl-resources:1.20.0
+    image: semtech/mu-cl-resources:1.21.0
     links:
       - database:database
     volumes:
       - ./config/resources:/config
+    environment:
+      CACHE_CLEAR_PATH: "http://cache/.mu/clear-keys"
+  database:
+    image: semtech/mu-authorization:0.6.0-beta.5
+    environment:
+      MU_SPARQL_ENDPOINT: "http://virtuoso:8890/sparql"
+      DATABASE_COMPATIBILITY: Virtuoso
+      LOG_DELTA_MESSAGES: "true"
+      LOG_DELTA_CLIENT_COMMUNICATION: "true"
+    volumes:
+      - ./config/authorization:/config
+    restart: always
+    logging: *default-logging
+    labels:
+      - "logging=true"
+  deltanotifier:
+    image: semtech/mu-delta-notifier:0.1.0
+    volumes:
+      - ./config/delta:/config
+    restart: always
+    logging: *default-logging
+    labels:
+      - "logging=true"
+    environment:
+      DEBUG_DELTA_SEND: "true"
+  meeting:
+    image: lblod/meeting-service 
+    restart: always
+    logging: *default-logging
+    labels:
+      - "logging=true"
