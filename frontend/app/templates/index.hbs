@@ -1,7 +1,7 @@
 {{page-title "Index"}}
-<button {{on 'click' this.createMeeting}}>Create</button>
+<button {{on 'click' this.createPublication}}>Create Meeting from publication</button>
 {{#if this.refresh}}
-  refreshing in {{this.refresh}} seconds
+  refreshing in {{this.refresh}} seconds (check publicatie service for extraction of meeting)
 {{/if}}
 <ul>
 {{#each @model as |meeting|}}

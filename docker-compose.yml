@@ -16,7 +16,14 @@ services:
     environment:
       DEFAULT_MU_AUTH_ALLOWED_GROUPS_HEADER: "[{\"variables\":[],\"name\":\"public\"}]"
       DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN_HEADER: '*'
-
+  besluit-publicatie:
+    image: lblod/besluit-publicatie-publish-service:0.10.0
+    links:
+      - database:database
+    restart: always
+    logging: *default-logging
+    labels:
+      - "logging=true"
   dispatcher:
     image: semtech/mu-dispatcher:2.0.0
     links:
@@ -24,7 +31,7 @@ services:
     volumes:
       - ./config/dispatcher:/config
   cache:
-    image: semtech/mu-cache:2.0.0
+    image: semtech/mu-cache:2.0.2
     links:
       - resource:backend
   virtuoso:

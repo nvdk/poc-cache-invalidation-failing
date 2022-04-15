@@ -28,6 +28,7 @@ defmodule Acl.UserGroups.Config do
                       resource_types: [
                         "http://data.vlaanderen.be/ns/besluit#Zitting",
                         "http://data.vlaanderen.be/ns/besluit#Bestuursorgaan",
+                        "http://mu.semte.ch/vocabularies/ext/signing/PublishedResource",
                       ]
                     } },
                   %GraphSpec{

@@ -27,6 +27,10 @@ defmodule Dispatcher do
     forward conn, path, "http://cache/zittingen/"
   end
 
+  match "/published-resources/*path" do
+    forward conn, path, "http://cache/published-resources/"
+  end
+
   match "/assets/*path", @html do
     forward conn, path, "http://frontend/assets/"
   end
